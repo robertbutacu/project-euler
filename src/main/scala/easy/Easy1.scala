@@ -80,11 +80,14 @@ object Easy1 extends App {
    */
 
   trait Error
-  case object MultipleCandidates extends Error
+  case object MultipleCandidates      extends Error
+  case object InsufficientCombinations extends Error
 
-  def findPassword(combinations: List[String]): Either[Error, String] = {
+  def findPassword(combinations: List[String], passwordLength: Int): Either[Error, String] = {
+    val chars = combinations.flatMap(_.toList).toSet
+
     def findFirstDigit(): Either[Error, String] = {
-      val chars = combinations.flatMap(_.toList).toSet.filter{
+      val candidates = chars.filter {
         c =>
           combinations.forall(
             s =>
@@ -92,18 +95,31 @@ object Easy1 extends App {
           )
       }
 
-      if(chars.size == 1) Right(chars.head.toString)
-      else                Left(MultipleCandidates)
+      if(candidates.size == 1) Right(candidates.head.toString)
+      else                     Left(MultipleCandidates)
     }
 
-    def go(combinations: List[String], passwordSoFar: String, index: Int): Either[Error, String] = {
+    def findNextDigit(passwordSoFar: String): Either[Error, String] = {
+      val candidates = chars.filter {
+        c =>
+          combinations.forall(
+            s =>
+              ???
+          )
+      }
+
+      ???
+    }
+
+    def go(passwordSoFar: String, index: Int): Either[Error, String] = {
       /*
         2 cases:
         1. when the first number is searched for, it is the number who only appears as a first digit
         2. otherwise, it is the digit who only appears after any combination of the digits so far
        */
       index match {
-        case 0 => findFirstDigit()
+        case 0                                          => findFirstDigit().flatMap(pass => go(pass, index + 1))
+        case lengthGoal if lengthGoal == passwordLength => Right(passwordSoFar)
         case _ => ???
       }
     }
