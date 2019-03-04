@@ -95,23 +95,36 @@ object Easy1 extends App {
           )
       }
 
-      if(candidates.size == 1) Right(candidates.head.toString)
-      else                     Left(MultipleCandidates)
+      candidates.size match {
+        case 0 => Left(InsufficientCombinations)
+        case 1 => println(s"[LOG] Found next digit ${candidates.head}"); Right(candidates.head.toString)
+        case _ => Left(MultipleCandidates)
+      }
     }
 
     def findNextDigit(passwordSoFar: String): Either[Error, String] = {
+      def onlyPasswordToTheLeft(combination: String, c: Char): Boolean = {
+        combination.slice(0, combination.indexOf(c)).forall(o => passwordSoFar.contains(o))
+      }
+
       val candidates = chars.filter {
         c =>
           combinations.forall(
             s =>
-              ???
+              (!s.contains(c) || onlyPasswordToTheLeft(s, c)) && (!passwordSoFar.contains(c))
           )
       }
 
-      ???
+      println(s"[LOG] Found candidates: $candidates")
+
+      candidates.size match {
+        case 0 => Left(InsufficientCombinations)
+        case 1 => println(s"[LOG] Found next digit ${candidates.head}"); Right(candidates.head.toString)
+        case _ => Left(MultipleCandidates)
+      }
     }
 
-    def go(passwordSoFar: String, index: Int): Either[Error, String] = {
+    def go(passwordSoFar: String = "", index: Int = 0): Either[Error, String] = {
       /*
         2 cases:
         1. when the first number is searched for, it is the number who only appears as a first digit
@@ -120,11 +133,13 @@ object Easy1 extends App {
       index match {
         case 0                                          => findFirstDigit().flatMap(pass => go(pass, index + 1))
         case lengthGoal if lengthGoal == passwordLength => Right(passwordSoFar)
-        case _ => ???
+        case _                                          => findNextDigit(passwordSoFar).flatMap(password => go(passwordSoFar + password, index + 1))
       }
     }
 
-    ???
+    go()
   }
 
+
+  println(findPassword(List("357", "379", "279", "328", "257", "850"), 3))
 }
