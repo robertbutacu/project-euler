@@ -67,9 +67,48 @@ object Easy1 extends App {
   def findMax: Future[List[BigDecimal]] = {
     for {
       values <- Future(Range.BigDecimal.inclusive(1000000.0, 1.0, -1.0).toList)
-      chains <- Future.traverse(values)(e => getChain(e).recover{case e: Exception => println(s"Found exception $e"); BigDecimal(0)})
+      chains <- Future.traverse(values)(e => getChain(e))//.recover{case e: Exception => println(s"Found exception $e"); BigDecimal(0)})
     } yield chains
   }
 
-  println(Await.result(findMax, Duration.Inf).max)
+  /*
+  A common security method used for online banking is to ask the user for three random characters from a passcode. For example, if the passcode was 531278, they may ask for the 2nd, 3rd, and 5th characters; the expected reply would be: 317.
+
+  The text file, keylog.txt, contains fifty successful login attempts.
+
+  Given that the three characters are always asked for in order, analyse the file so as to determine the shortest possible secret passcode of unknown length.
+   */
+
+  trait Error
+  case object MultipleCandidates extends Error
+
+  def findPassword(combinations: List[String]): Either[Error, String] = {
+    def findFirstDigit(): Either[Error, String] = {
+      val chars = combinations.flatMap(_.toList).toSet.filter{
+        c =>
+          combinations.forall(
+            s =>
+              !s.contains(c) || s.indexOf(c) == 0
+          )
+      }
+
+      if(chars.size == 1) Right(chars.head.toString)
+      else                Left(MultipleCandidates)
+    }
+
+    def go(combinations: List[String], passwordSoFar: String, index: Int): Either[Error, String] = {
+      /*
+        2 cases:
+        1. when the first number is searched for, it is the number who only appears as a first digit
+        2. otherwise, it is the digit who only appears after any combination of the digits so far
+       */
+      index match {
+        case 0 => findFirstDigit()
+        case _ => ???
+      }
+    }
+
+    ???
+  }
+
 }
