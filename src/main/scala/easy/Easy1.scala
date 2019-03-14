@@ -140,5 +140,4 @@ object Easy1 extends App {
     go()
   }
 
-  println(findPassword(Combinations.combinations, 6))
 }
